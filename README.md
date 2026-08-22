@@ -6,8 +6,8 @@ A robust RESTful API built with **Django REST Framework (DRF)**, **Celery**, and
 
 ## 📌 Project Overview
 This repository contains the full implementation for both phases of the project:
-* **Phase 1 Documentation:** Architectural specs and core system requirements (`docs/document.pdf`).
-* **Phase 2 Specification:** Backup API guidelines, async processing, and scheduling (`docs/backup.pdf`).
+* **Phase 1:** Architectural specs and core system requirements.
+* **Phase 2:** Backup API guidelines, async processing, and scheduling.
 
 The API provides immediate backup execution via background task queues and supports status tracking and scheduled backups.
 
