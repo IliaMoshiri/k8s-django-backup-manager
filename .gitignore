@@ -1,0 +1,25 @@
+# Python / Django
+__pycache__/
+*.py[cod]
+*$py.class
+db.sqlite3
+*.log
+
+# Environments (venv)
+venv/
+env/
+ENV/
+
+# Windows / IDE System Files
+.vscode/
+.idea/
+Thumbs.db
+Desktop.ini
+
+# Temporary Backup Files
+/tmp/
+backups/
+*.tar.gz
+
+# Sensitive Info
+.env
