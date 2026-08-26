@@ -21,6 +21,8 @@ The API provides immediate backup execution via background task queues and suppo
   `/tmp/backups/{app_id}/{yyyy-mm-dd}/{backup_id}.tar.gz`
 * **Periodic Scheduling Support:** Accepts Cron expressions (e.g., `0 2 * * *`) for automated background execution.
 * **Redis Caching & Brokerage:** Uses Redis as both the task message broker and result backend.
+* **Stateful App Backups:** Supports persistent volume dynamic configuration (`disk` spec updates).
+* **Secure Credentials Handling:** Fully environment-driven configuration powered by `python-dotenv`.
 
 ---
 
@@ -29,7 +31,7 @@ The API provides immediate backup execution via background task queues and suppo
 * **Framework:** Django 6.1 / Django REST Framework
 * **Task Queue:** Celery 5.6.3
 * **Broker & Cache:** Redis
-* **Database:** SQLite (Local Development)
+* **Database:** PostgreSQL (with psycopg2)
 * **Language:** Python 3.12
 
 ---
@@ -47,7 +49,7 @@ The API provides immediate backup execution via background task queues and suppo
 ## 💻 Local Setup Guide
 
 ### 1. Prerequisites
-Ensure you have Python 3.12+ and Redis Server installed on your system.
+Ensure you have Python 3.12+, PostgreSQL, and Redis Server installed on your system.
 
 ### 2. Environment Setup
 ```bash
@@ -61,14 +63,20 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
+
+# Copy environment config
+cp .env.example .env
+# Update .env with your PostgreSQL credentials
 ```
 
 ### 3. Database & Services
 ```bash
-# Start Redis service
+# Start Services
 sudo service redis-server start
+sudo systemctl start postgresql
 
-# Apply Django migrations
+# Create DB and Apply Django migrations
+sudo -u postgres psql -c "CREATE DATABASE k8s_backup_db;"
 python manage.py migrate
 ```
 
@@ -89,24 +97,24 @@ Open two separate terminal windows:
 
 ### Trigger Instant Backup
 ```bash
-curl -i -X POST [http://127.0.0.1:8000/backup/](http://127.0.0.1:8000/backup/) \
+curl -i -X POST http://127.0.0.1:8000/backup/ \
      -H "Content-Type: application/json" \
      -d '{"app_id": 1, "source_path": "/var/lib/myapp/data.db"}'
 ```
 
 ### Trigger Scheduled Backup (Cron)
 ```bash
-curl -i -X POST [http://127.0.0.1:8000/backup/](http://127.0.0.1:8000/backup/) \
+curl -i -X POST http://127.0.0.1:8000/backup/ \
      -H "Content-Type: application/json" \
      -d '{"app_id": 1, "source_path": "/var/lib/myapp/data.db", "schedule": "0 2 * * *"}'
 ```
 
 ### Check Backup Status
 ```bash
-curl [http://127.0.0.1:8000/backup/](http://127.0.0.1:8000/backup/)<backup_id>/
+curl http://127.0.0.1:8000/backup/<backup_id>/
 ```
 
 ### List All Backups for an Application
 ```bash
-curl "[http://127.0.0.1:8000/backup/?app_id=1](http://127.0.0.1:8000/backup/?app_id=1)"
+curl http://127.0.0.1:8000/backup/?app_id=1
 ```
