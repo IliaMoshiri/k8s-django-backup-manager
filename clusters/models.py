@@ -27,6 +27,7 @@ class App(models.Model):
     replicas = models.IntegerField(default=1)
     cpu = models.CharField(max_length=50, default="100m")
     memory = models.CharField(max_length=50, default="128Mi")
+    disk = models.CharField(max_length=50, default="1Gi")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

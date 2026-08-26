@@ -22,5 +22,5 @@ class AppSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = App
-        fields = ['id', 'namespace_id', 'name', 'image', 'replicas', 'cpu', 'memory', 'created_at']
+        fields = ['id', 'namespace_id', 'name', 'image', 'replicas', 'cpu', 'memory', 'disk', 'created_at']
         read_only_fields = ['id', 'created_at']
