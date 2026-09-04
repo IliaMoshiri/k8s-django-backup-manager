@@ -29,8 +29,13 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-change-this-i
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['37.32.8.244', 'localhost', '127.0.0.1']
-
+ALLOWED_HOSTS = [
+    'moshiri.osdl.ir',
+    'localhost',
+    '127.0.0.1',
+    'backend-service',
+    '*',
+]
 # Application definition
 
 INSTALLED_APPS = [

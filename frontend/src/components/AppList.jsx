@@ -15,7 +15,7 @@ export default function AppList() {
   const fetchApps = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/app?namespace_id=${namespaceId}`);
+      const res = await api.get(`/app/?namespace_id=${namespaceId}`);
       setApps(res.data);
     } catch (err) {
       message.error('Failed to fetch apps list');
@@ -30,7 +30,7 @@ export default function AppList() {
 
   const handleCreate = async (values) => {
     try {
-      await api.post('/app', { ...values, namespace_id: parseInt(namespaceId) });
+      await api.post('/app/', { ...values, namespace_id: parseInt(namespaceId) });
       message.success('App created successfully');
       setIsModalOpen(false);
       form.resetFields();

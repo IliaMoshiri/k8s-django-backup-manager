@@ -2,10 +2,12 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
-from clusters.models import App
+
+from clusters.models import App, Cluster, Namespace
 from .models import BackupTask
 from .serializers import BackupTaskSerializer
 from .tasks import process_backup_task
+
 
 class BackupAPIView(APIView):
 
@@ -50,3 +52,102 @@ class BackupAPIView(APIView):
 
         serializer = BackupTaskSerializer(tasks, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ClusterAPIView(APIView):
+    def get(self, request):
+        clusters = Cluster.objects.all().values('id', 'name', 'address')
+        return Response(list(clusters), status=status.HTTP_200_OK)
+
+    def post(self, request):
+        name = request.data.get('name')
+        address = request.data.get('address')
+        token = request.data.get('token')
+
+        if not name:
+            return Response({"error": "Name is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        cluster = Cluster.objects.create(
+            name=name,
+            address=address,
+            token=token
+        )
+        return Response({
+            "id": cluster.id, 
+            "name": cluster.name,
+            "address": cluster.address
+        }, status=status.HTTP_201_CREATED)
+
+
+class NamespaceAPIView(APIView):
+    def get(self, request):
+        cluster_id = request.query_params.get('cluster_id')
+        if cluster_id:
+            namespaces = Namespace.objects.filter(cluster_id=cluster_id).values('id', 'name', 'cluster_id')
+        else:
+            namespaces = Namespace.objects.all().values('id', 'name', 'cluster_id')
+        return Response(list(namespaces), status=status.HTTP_200_OK)
+
+    def post(self, request):
+        name = request.data.get('name')
+        cluster_id = request.data.get('cluster_id') or request.data.get('cluster')
+
+        if not name or not cluster_id:
+            return Response({"error": "Name and cluster_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        cluster_obj = get_object_or_404(Cluster, id=cluster_id)
+        namespace = Namespace.objects.create(name=name, cluster=cluster_obj)
+
+        return Response({
+            "id": namespace.id,
+            "name": namespace.name,
+            "cluster_id": namespace.cluster_id
+        }, status=status.HTTP_201_CREATED)
+
+    def delete(self, request, pk=None):
+        namespace = get_object_or_404(Namespace, id=pk)
+        namespace.delete()
+        return Response({"message": "Namespace deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
+
+
+class AppAPIView(APIView):
+    def get(self, request):
+        namespace_id = request.query_params.get('namespace_id')
+        if namespace_id:
+            apps = App.objects.filter(namespace_id=namespace_id).values(
+                'id', 'name', 'image', 'replicas', 'cpu', 'memory', 'namespace_id'
+            )
+        else:
+            apps = App.objects.all().values(
+                'id', 'name', 'image', 'replicas', 'cpu', 'memory', 'namespace_id'
+            )
+        return Response(list(apps), status=status.HTTP_200_OK)
+
+    def post(self, request):
+        name = request.data.get('name')
+        image = request.data.get('image')
+        replicas = request.data.get('replicas', 1)
+        cpu = request.data.get('cpu', '100m')
+        memory = request.data.get('memory', '128Mi')
+        namespace_id = request.data.get('namespace_id') or request.data.get('namespace')
+
+        if not name or not image or not namespace_id:
+            return Response({"error": "name, image, and namespace_id are required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        namespace_obj = get_object_or_404(Namespace, id=namespace_id)
+        app_obj = App.objects.create(
+            name=name,
+            image=image,
+            replicas=replicas,
+            cpu=cpu,
+            memory=memory,
+            namespace=namespace_obj
+        )
+
+        return Response({
+            "id": app_obj.id,
+            "name": app_obj.name,
+            "image": app_obj.image,
+            "replicas": app_obj.replicas,
+            "namespace_id": app_obj.namespace_id
+        }, status=status.HTTP_201_CREATED)

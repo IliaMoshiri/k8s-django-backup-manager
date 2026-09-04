@@ -15,7 +15,7 @@ export default function NamespaceList() {
   const fetchNamespaces = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/namespace?cluster_id=${clusterId}`);
+      const res = await api.get(`/namespace/?cluster_id=${clusterId}`);
       setNamespaces(res.data);
     } catch (err) {
       message.error('Failed to fetch namespaces');
@@ -30,10 +30,9 @@ export default function NamespaceList() {
 
   const handleCreate = async (values) => {
     try {
-      await api.post('/namespace', {
+      await api.post('/namespace/', {
         name: values.name,
         cluster_id: parseInt(clusterId),
-        cluster: parseInt(clusterId)
       });
       message.success('Namespace created successfully');
       setIsModalOpen(false);
@@ -47,7 +46,7 @@ export default function NamespaceList() {
 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/namespace/${id}`);
+      await api.delete(`/namespace/${id}/`);
       message.success('Namespace deleted successfully');
       fetchNamespaces();
     } catch (err) {

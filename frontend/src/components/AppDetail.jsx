@@ -14,7 +14,7 @@ export default function AppDetail() {
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/app?namespace_id=1`);
+      const res = await api.get(`/app/?namespace_id=1`);
       const found = res.data.find((a) => a.id === parseInt(appId));
       if (found) {
         setAppData(found);

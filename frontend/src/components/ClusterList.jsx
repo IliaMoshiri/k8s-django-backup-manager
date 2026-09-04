@@ -14,7 +14,7 @@ export default function ClusterList() {
   const fetchClusters = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/cluster');
+      const res = await api.get('/cluster/');
       setClusters(res.data);
     } catch (err) {
       message.error('Failed to fetch clusters list');
@@ -29,7 +29,8 @@ export default function ClusterList() {
 
   const handleCreate = async (values) => {
     try {
-      await api.post('/cluster', values);
+      // ✅ اضافه شدن اسلش پایانی به آدرس
+      await api.post('/cluster/', values);
       message.success('Cluster created successfully');
       setIsModalOpen(false);
       form.resetFields();
