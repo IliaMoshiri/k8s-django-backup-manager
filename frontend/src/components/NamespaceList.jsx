@@ -30,12 +30,17 @@ export default function NamespaceList() {
 
   const handleCreate = async (values) => {
     try {
-      await api.post('/namespace', { ...values, cluster_id: parseInt(clusterId) });
+      await api.post('/namespace', {
+        name: values.name,
+        cluster_id: parseInt(clusterId),
+        cluster: parseInt(clusterId)
+      });
       message.success('Namespace created successfully');
       setIsModalOpen(false);
       form.resetFields();
       fetchNamespaces();
     } catch (err) {
+      console.error('API Error:', err.response?.data);
       message.error('Failed to create namespace');
     }
   };
