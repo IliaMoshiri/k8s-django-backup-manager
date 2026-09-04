@@ -45,7 +45,8 @@ class BackupAPIView(APIView):
         app_id = request.query_params.get('app_id')
         if app_id:
             tasks = BackupTask.objects.filter(app_id=app_id)
-            serializer = BackupTaskSerializer(tasks, many=True)
-            return Response(serializer.data)
+        else:
+            tasks = BackupTask.objects.all()
 
-        return Response({"error": "Provide backup_id in URL path or app_id in query params."}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = BackupTaskSerializer(tasks, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

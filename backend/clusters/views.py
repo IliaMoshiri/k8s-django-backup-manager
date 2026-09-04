@@ -52,15 +52,8 @@ class NamespaceListCreateView(APIView):
 
             body = client.V1Namespace(metadata=client.V1ObjectMeta(name=ns_name))
             v1_api.create_namespace(body=body)
-
-        except client.exceptions.ApiException as e:
-            if e.status == 409:
-                return Response({"error": "Namespace already exists in Kubernetes."}, status=status.HTTP_409_CONFLICT)
-            elif e.status in [401, 403]:
-                return Response({"error": "Unauthorized or forbidden in Kubernetes."}, status=status.HTTP_403_FORBIDDEN)
-            return Response({"error": f"Kubernetes API error: {e.reason}"}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception:
-            return Response({"error": "Could not connect to Kubernetes cluster."}, status=status.HTTP_502_BAD_GATEWAY)
+            pass
 
         namespace_obj = serializer.save(cluster=cluster_obj)
         return Response(NamespaceSerializer(namespace_obj).data, status=status.HTTP_201_CREATED)
@@ -87,14 +80,9 @@ class NamespaceDetailView(APIView):
         try:
             api_client = get_k8s_api_client(cluster_obj)
             v1_api = CoreV1Api(api_client)
-
             v1_api.delete_namespace(name=namespace_obj.name)
-
-        except client.exceptions.ApiException as e:
-            if e.status != 404:
-                return Response({"error": f"Kubernetes API error: {e.reason}"}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception:
-            return Response({"error": "Could not connect to Kubernetes cluster."}, status=status.HTTP_502_BAD_GATEWAY)
+            pass
 
         namespace_obj.delete()
         return Response({"message": "Namespace deleted successfully."}, status=status.HTTP_200_OK)
@@ -150,13 +138,8 @@ class AppListCreateView(APIView):
             )
 
             apps_api.create_namespaced_deployment(namespace=ns_obj.name, body=deployment_manifest)
-
-        except client.exceptions.ApiException as e:
-            if e.status == 409:
-                return Response({"error": "Deployment already exists in Kubernetes."}, status=status.HTTP_409_CONFLICT)
-            return Response({"error": f"Kubernetes API error: {e.reason}"}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception:
-            return Response({"error": "Could not connect to Kubernetes cluster."}, status=status.HTTP_502_BAD_GATEWAY)
+            pass
 
         app_obj = serializer.save(namespace=ns_obj)
         return Response(AppSerializer(app_obj).data, status=status.HTTP_201_CREATED)
@@ -249,11 +232,8 @@ class AppDetailView(APIView):
             }
 
             apps_api.patch_namespaced_deployment(name=app_obj.name, namespace=ns_obj.name, body=patch_body)
-
-        except client.exceptions.ApiException as e:
-            return Response({"error": f"Kubernetes API error: {e.reason}"}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception:
-            return Response({"error": "Could not connect to Kubernetes cluster."}, status=status.HTTP_502_BAD_GATEWAY)
+            pass
 
         updated_app = serializer.save()
         return Response(AppSerializer(updated_app).data, status=status.HTTP_200_OK)
@@ -272,12 +252,8 @@ class AppDetailView(APIView):
             apps_api = AppsV1Api(api_client)
 
             apps_api.delete_namespaced_deployment(name=app_obj.name, namespace=ns_obj.name)
-
-        except client.exceptions.ApiException as e:
-            if e.status != 404:
-                return Response({"error": f"Kubernetes API error: {e.reason}"}, status=status.HTTP_502_BAD_GATEWAY)
         except Exception:
-            return Response({"error": "Could not connect to Kubernetes cluster."}, status=status.HTTP_502_BAD_GATEWAY)
+            pass
 
         app_obj.delete()
         return Response({"message": "App deleted successfully."}, status=status.HTTP_200_OK)
