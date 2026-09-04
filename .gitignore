@@ -2,6 +2,7 @@
 __pycache__/
 *.py[cod]
 *$py.class
+*.sqlite3
 db.sqlite3
 *.log
 
@@ -9,12 +10,14 @@ db.sqlite3
 venv/
 env/
 ENV/
+staticfiles/
 
 # Windows / IDE System Files
 .vscode/
 .idea/
 Thumbs.db
 Desktop.ini
+.DS_Store
 
 # Temporary Backup Files
 /tmp/
@@ -23,3 +26,10 @@ backups/
 
 # Sensitive Info
 .env
+
+# Node / React
+node_modules/
+build/
+dist/
+
+
