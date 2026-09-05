@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Card, Form, Input, InputNumber, Button, Descriptions, Popconfirm, message, Space, Divider } from 'antd';
+import { Card, Form, Input, InputNumber, Button, Descriptions, Popconfirm, message, Space, Divider, Spin } from 'antd';
 import { DeleteOutlined, SaveOutlined, CloudUploadOutlined } from '@ant-design/icons';
 import api from '../api';
 
@@ -8,17 +8,21 @@ export default function AppDetail() {
   const { appId } = useParams();
   const navigate = useNavigate();
   const [appData, setAppData] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [form] = Form.useForm();
 
   const fetchDetail = async () => {
     setLoading(true);
     try {
-      const res = await api.get(`/app/?namespace_id=1`);
+      // ✅ گرفتن لیست کلی اپ‌ها یا فیلتر بر اساس API
+      const res = await api.get('/app/');
       const found = res.data.find((a) => a.id === parseInt(appId));
+      
       if (found) {
         setAppData(found);
         form.setFieldsValue(found);
+      } else {
+        message.error('App not found');
       }
     } catch (err) {
       message.error('Failed to fetch app details');
@@ -33,7 +37,8 @@ export default function AppDetail() {
 
   const handleUpdate = async (values) => {
     try {
-      await api.put(`/app/${appId}`, values);
+      // ✅ اسلش پایانی اضافه شد
+      await api.put(`/app/${appId}/`, values);
       message.success('App updated successfully');
       fetchDetail();
     } catch (err) {
@@ -43,7 +48,8 @@ export default function AppDetail() {
 
   const handleDelete = async () => {
     try {
-      await api.delete(`/app/${appId}`);
+      // ✅ اسلش پایانی اضافه شد
+      await api.delete(`/app/${appId}/`);
       message.success('App deleted successfully');
       navigate(-1);
     } catch (err) {
@@ -63,13 +69,27 @@ export default function AppDetail() {
     }
   };
 
-  if (!appData) return null;
+  if (loading) {
+    return (
+      <Card style={{ textAlign: 'center', padding: '50px' }}>
+        <Spin size="large" tip="Loading application details..." />
+      </Card>
+    );
+  }
+
+  if (!appData) {
+    return (
+      <Card title="App Not Found">
+        <Button onClick={() => navigate(-1)}>Go Back</Button>
+      </Card>
+    );
+  }
 
   return (
-    <Card title={`Application Details: ${appData.name}`} loading={loading}>
+    <Card title={`Application Details: ${appData.name}`}>
       <Descriptions bordered column={2}>
         <Descriptions.Item label="App ID">{appData.id}</Descriptions.Item>
-        <Descriptions.Item label="Created At">{appData.created_at}</Descriptions.Item>
+        <Descriptions.Item label="Image">{appData.image}</Descriptions.Item>
       </Descriptions>
 
       <Divider>Configuration & Updates</Divider>

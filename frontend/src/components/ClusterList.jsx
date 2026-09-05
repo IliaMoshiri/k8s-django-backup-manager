@@ -29,7 +29,6 @@ export default function ClusterList() {
 
   const handleCreate = async (values) => {
     try {
-      // ✅ اضافه شدن اسلش پایانی به آدرس
       await api.post('/cluster/', values);
       message.success('Cluster created successfully');
       setIsModalOpen(false);

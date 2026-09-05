@@ -111,7 +111,19 @@ class NamespaceAPIView(APIView):
 
 
 class AppAPIView(APIView):
-    def get(self, request):
+    def get(self, request, pk=None):
+        if pk:
+            app_obj = get_object_or_404(App, id=pk)
+            return Response({
+                "id": app_obj.id,
+                "name": app_obj.name,
+                "image": app_obj.image,
+                "replicas": app_obj.replicas,
+                "cpu": app_obj.cpu,
+                "memory": app_obj.memory,
+                "namespace_id": app_obj.namespace_id
+            }, status=status.HTTP_200_OK)
+
         namespace_id = request.query_params.get('namespace_id')
         if namespace_id:
             apps = App.objects.filter(namespace_id=namespace_id).values(
@@ -151,3 +163,26 @@ class AppAPIView(APIView):
             "replicas": app_obj.replicas,
             "namespace_id": app_obj.namespace_id
         }, status=status.HTTP_201_CREATED)
+
+    def put(self, request, pk=None):
+        app_obj = get_object_or_404(App, id=pk)
+        app_obj.image = request.data.get('image', app_obj.image)
+        app_obj.replicas = request.data.get('replicas', app_obj.replicas)
+        app_obj.cpu = request.data.get('cpu', app_obj.cpu)
+        app_obj.memory = request.data.get('memory', app_obj.memory)
+        app_obj.save()
+
+        return Response({
+            "id": app_obj.id,
+            "name": app_obj.name,
+            "image": app_obj.image,
+            "replicas": app_obj.replicas,
+            "cpu": app_obj.cpu,
+            "memory": app_obj.memory,
+            "namespace_id": app_obj.namespace_id
+        }, status=status.HTTP_200_OK)
+
+    def delete(self, request, pk=None):
+        app_obj = get_object_or_404(App, id=pk)
+        app_obj.delete()
+        return Response({"message": "App deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
